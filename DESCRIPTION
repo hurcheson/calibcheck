@@ -11,6 +11,7 @@ Description: Independent diagnostics for whether binary target
     and separates achieved balance from numerical convergence.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 Imports: lpSolve
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown
 VignetteBuilder: knitr
