@@ -39,7 +39,9 @@ returns weights. Bounds are normalized per-task fractions, not mean-one weights.
 `min_max_weight` estimates the smallest maximum individual weight at optimal
 margin discrepancy, including bounded problems; `NA` means not evaluated or
 not numerically verified (including a ten-second concentration-solver timeout).
-Supplied raw/final weights have separate balance and box-violation diagnostics.
+For large bounded problems, the additional LP can take several seconds. Set
+`concentration = FALSE` in either audit function to skip it without changing
+feasibility or balance diagnostics. Supplied raw/final weights have separate balance and box-violation diagnostics.
 
 `calibration_matrix()` constructs labelled rows from categorical data and named
 target fractions, retaining unobserved levels. Without labels, arbitrary binary
@@ -65,10 +67,11 @@ describes the complete workflow and the limitations of exact certificates.
 - Floating-point LP bounds are numerical. Exact verification is automatic for
   eligible unrestricted rational targets, but limited by the original integer
   cap; no arbitrary precision or exact bounded certificate. The tolerance is
-  compared to the explicit round-tripping decimal when that fraction fits.
+  compared to the explicit round-tripping decimal when that fraction fits (e.g. `2^-30` does not fit).
+  An exactly zero upper certificate remains decisive.
 - Missing rows are reported individually; their mass must not be added across
   overlapping margins. ESS is descriptive and not a variance estimator.
 - Different packages use different residual scales/tolerances, so no-status
   outputs are not evidence of a general package defect.
-- MIT licensed. Maintainer: Hurcheson Ofori. This is a release candidate, not yet on CRAN.
+- MIT licensed. Maintainer: Hurcheson Asante Ofori. This is a release candidate, not yet on CRAN.
 - Public examples and tests use synthetic or built-in R data.

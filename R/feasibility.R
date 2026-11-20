@@ -80,10 +80,11 @@ rationalize_certificate <- function(M, target_num, target_den, feasibility, tole
 
 #' Feasibility of target margins independently of producer weights.
 check_feasibility <- function(M,target,tolerance=1e-6,lower=0,upper=1,
-                              target_num=NULL,target_den=NULL) {
+                              target_num=NULL,target_den=NULL, concentration=TRUE) {
   M <- validate_matrix(M); k <- nrow(M); n <- ncol(M)
   target <- validate_target(target, k)
   if(!is.numeric(tolerance)||length(tolerance)!=1||!is.finite(tolerance)||tolerance<=0) stop("Invalid tolerance")
+  if(!is.logical(concentration)||length(concentration)!=1||is.na(concentration)) stop("Invalid concentration flag")
   bounds <- function(x) {
     if(!is.numeric(x)||!length(x)%in%c(1,n)||any(!is.finite(x))||any(x<0|x>1)) stop("Invalid weight bounds")
     rep_len(x,n)
@@ -154,6 +155,7 @@ check_feasibility <- function(M,target,tolerance=1e-6,lower=0,upper=1,
   # For an unrestricted group, equal splitting is optimal. With heterogeneous
   # bounds use the original columns and individual caps, not group averages.
   f$min_max_weight <- NA_real_
+  if(!concentration) return(f)
   if(!bounded) {
     j <- seq_len(m)
     Q <- sparse_lp("min",c(rep(0,m),1),rbind(cbind(A,0),cbind(-A,0),c(rep(1,m),0)),

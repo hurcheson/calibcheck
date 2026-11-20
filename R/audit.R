@@ -26,7 +26,7 @@ normalize_weights <- function(w, n) {
 #' Audit normalized calibration weights
 audit_calibration <- function(M, target, raw=NULL, final=NULL, converged=NA, tolerance=1e-6,
                               case_id=NULL, margin=NULL, level=NULL, lower=0, upper=1,
-                              target_num=NULL,target_den=NULL) {
+                              target_num=NULL,target_den=NULL, concentration=TRUE) {
   M <- validate_matrix(M); k <- nrow(M); n <- ncol(M)
   target <- validate_target(target, k)
   if (!is.numeric(tolerance) || length(tolerance)!=1 || !is.finite(tolerance) || tolerance<=0)
@@ -41,7 +41,7 @@ audit_calibration <- function(M, target, raw=NULL, final=NULL, converged=NA, tol
   }
   if(is.null(margin)) margin <- rep(NA_character_,k)
   if(is.null(level)) level <- if(is.null(rownames(M))) as.character(seq_len(k)) else rownames(M)
-  f <- check_feasibility(M,target,tolerance,lower,upper,target_num,target_den)
+  f <- check_feasibility(M,target,tolerance,lower,upper,target_num,target_den,concentration)
   summarize <- function(w) {
     p <- normalize_weights(w,n); achieved <- drop(M %*% p)
     residual <- achieved-target; gap <- max(abs(residual))

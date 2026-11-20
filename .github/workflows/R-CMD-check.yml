@@ -29,7 +29,7 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates locales build-essential r-base-core r-base-dev r-cran-lpsolve r-cran-testthat r-cran-covr r-cran-knitr r-cran-rmarkdown pandoc qpdf tidy
           locale-gen en_US.UTF-8
           /usr/bin/Rscript -e 'print(R.version.string); print(packageVersion("lpSolve"))'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Build, check and install
         run: |
           mkdir -p "$RUNNER_TEMP/calibcheck-library" "$RUNNER_TEMP/calibcheck-build"
@@ -44,3 +44,63 @@ jobs:
         run: /usr/bin/Rscript -e 'library(calibcheck); source("validation/bounded_parity.R"); source("validation/concentration_parity.R"); source("validation/state_example.R")'
       - name: Coverage
         run: /usr/bin/Rscript -e 'x <- covr::package_coverage("."); print(x); stopifnot(covr::percent_coverage(x)>=80)'
+  current:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: ubuntu-latest, r: 'devel'}
+          - {os: windows-latest, r: 'release'}
+          - {os: macos-latest, r: 'release'}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 30
+    env:
+      _R_CHECK_CRAN_INCOMING_: 'true'
+      _R_CHECK_CRAN_INCOMING_REMOTE_: 'true'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          extra-packages: |
+            any::rcmdcheck
+            any::spelling
+          needs: check
+      - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          args: 'c("--as-cran", "--no-manual")'
+          error-on: '"warning"'
+      - name: Install manual build dependencies
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra qpdf tidy
+      - name: Full CRAN check and source tarball
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        shell: bash
+        env:
+          _R_CHECK_SYSTEM_CLOCK_: 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/calibcheck-source" "$RUNNER_TEMP/calibcheck-release"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/calibcheck-source"
+          Rscript -e 'x <- spelling::spell_check_package(Sys.getenv("RUNNER_TEMP") |> file.path("calibcheck-source")); print(x); stopifnot(nrow(x) == 0)'
+          cd "$RUNNER_TEMP/calibcheck-release"
+          R CMD build "$RUNNER_TEMP/calibcheck-source"
+          R CMD check --as-cran calibcheck_0.1.0.tar.gz
+          test -f calibcheck.Rcheck/calibcheck-manual.pdf
+          sha256sum calibcheck_0.1.0.tar.gz
+      - name: Upload release-check evidence
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release' && always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: release-check-evidence
+          path: |
+            ${{ runner.temp }}/calibcheck-release/calibcheck_0.1.0.tar.gz
+            ${{ runner.temp }}/calibcheck-release/calibcheck.Rcheck/00check.log
+            ${{ runner.temp }}/calibcheck-release/calibcheck.Rcheck/calibcheck-manual.pdf
+          if-no-files-found: warn
