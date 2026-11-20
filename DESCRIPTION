@@ -1,0 +1,20 @@
+Package: calibcheck
+Type: Package
+Title: Audit Normalized Calibration Weights
+Version: 0.1.0
+Authors@R: person("Hurcheson", "Ofori", role = c("aut", "cre"), email = "oforihurcheson@gmail.com")
+Author: Hurcheson Ofori [aut, cre]
+Maintainer: Hurcheson Ofori <oforihurcheson@gmail.com>
+Description: Independent diagnostics for whether binary target
+    margins can be attained using nonnegative normalized weights. Reports
+    numerical primal and dual residual bounds, checks rational certificates,
+    and separates achieved balance from numerical convergence.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports: lpSolve
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Depends: R (>= 4.0)
+URL: https://github.com/hurcheson/calibcheck
+BugReports: https://github.com/hurcheson/calibcheck/issues

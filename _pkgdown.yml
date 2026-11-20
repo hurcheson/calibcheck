@@ -1,0 +1,12 @@
+template:
+  bootstrap: 5
+reference:
+  - title: Prepare and audit
+    contents:
+      - calibration_matrix
+      - audit_calibration
+      - check_feasibility
+  - title: Exact certificates
+    contents:
+      - rationalize_certificate
+      - verify_certificate

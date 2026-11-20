@@ -1,0 +1,9 @@
+^validation$
+^REVIEW.md$
+^VALIDATION.md$
+^LICENSE\.md$
+^CONTRIBUTING\.md$
+^_pkgdown\.yml$
+^\.github$
+^docs$
+^cran-comments\.md$

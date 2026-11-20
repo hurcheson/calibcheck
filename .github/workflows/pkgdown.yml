@@ -1,0 +1,51 @@
+name: Package documentation
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy to GitHub Pages (requires Pages source set to GitHub Actions)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu:24.04
+    timeout-minutes: 15
+    env:
+      LANG: en_US.UTF-8
+    steps:
+      - name: Install R and documentation dependencies
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates locales build-essential r-base-core r-base-dev r-cran-lpsolve r-cran-testthat r-cran-knitr r-cran-rmarkdown r-cran-pkgdown pandoc
+          locale-gen en_US.UTF-8
+      - uses: actions/checkout@v4
+      - name: Build pkgdown
+        run: /usr/bin/Rscript -e 'pkgdown::build_site()'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkgdown-site
+          path: docs
+      - name: Upload Pages artifact
+        if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy documentation
+        id: deployment
+        uses: actions/deploy-pages@v4

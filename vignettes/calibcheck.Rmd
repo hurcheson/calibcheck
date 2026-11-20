@@ -1,0 +1,65 @@
+---
+title: "Auditing calibration feasibility before trusting weights"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Auditing calibration feasibility before trusting weights}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+library(calibcheck)
+M <- rbind(c(1,0),c(0,1),c(1,0),c(0,1))
+f <- check_feasibility(M,c(.9,.1,.1,.9),target_num=c(9,1,1,9),target_den=10)
+f[c("status","scope","lower","upper","exact")]
+f$certificate[c("lower_num","lower_den","upper_num","upper_den")]
+```
+
+The columns have identical patterns across the two margins. No nonnegative
+normalized weights can attain conflicting targets. A producer's success flag
+is not a feasibility certificate. The exact bracket uses independently verified
+integer witnesses; it proves infeasibility at the requested tolerance for the
+specified rational target, not merely that the LP implementation reported failure.
+
+```{r}
+audit_calibration(M,c(.9,.1,.1,.9),raw=c(.1,.9),converged=TRUE,
+                  margin=c("A","A","B","B"),level=rep(c("1","2"),2))$raw$ledger
+```
+
+Feasible does not mean practically usable. A target may require almost all
+weight on a single observation. Box constraints change the attainable set.
+
+```{r}
+M <- matrix(c(1,0,0,0),1)
+check_feasibility(M,.97)$min_max_weight
+check_feasibility(M,.97,upper=.5)[c("scope","status","lower","upper")]
+```
+
+The four-task target requires at least 97% on the first task at exact balance;
+with a 50% cap the discrepancy is at least 0.47. The bounded result is numerical,
+not an exact certificate. Base weights can be translated into normalized per-task
+lower and upper bounds if that is the intended domain; no distance-to-base-weight
+objective is implemented.
+
+```{r}
+z <- calibration_matrix(data.frame(region = c("a", "a", "b")),
+                        list(region = c(a = .5, b = .25, c = .25)))
+audit_calibration(z$M, z$target, raw = c(1, 1, 1),
+                  margin = z$margin, level = z$level)$raw$ledger
+```
+
+The missing level is retained rather than silently dropped. The target mass
+assigned to it is a lower bound on the residual. Bounded concentration is
+computed over individual weight caps, not just aggregate pattern counts.
+
+The public tests use synthetic matrices, exact target counts and independent optimization oracles.
+
+## Limitations
+
+The exact verifier currently uses bounded integer arithmetic, not arbitrary
+precision. For large target denominators, a 2^20 witness can be insufficient
+at tolerance 1e-6; the automatic routine retries at 2^31 and larger safe scales.
+Arbitrary binary floating-point targets can exceed the cap; no rational target
+is silently approximated. A numerical verdict and a certified verdict are
+distinguished by `exact` and the certificate field. Exact zero discrepancy is
+not guaranteed by finite witness rounding. Bounded problems are numerical only.

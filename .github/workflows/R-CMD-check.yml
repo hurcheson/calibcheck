@@ -1,0 +1,46 @@
+name: R package checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: calibcheck-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['ubuntu:22.04', 'ubuntu:24.04']
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    timeout-minutes: 15
+    env:
+      _R_CHECK_CRAN_INCOMING_REMOTE_: 'false'
+      _R_CHECK_SYSTEM_CLOCK_: 'false'
+      LANG: en_US.UTF-8
+    steps:
+      - name: Install R and dependencies
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates locales build-essential r-base-core r-base-dev r-cran-lpsolve r-cran-testthat r-cran-covr r-cran-knitr r-cran-rmarkdown pandoc qpdf tidy
+          locale-gen en_US.UTF-8
+          /usr/bin/Rscript -e 'print(R.version.string); print(packageVersion("lpSolve"))'
+      - uses: actions/checkout@v4
+      - name: Build, check and install
+        run: |
+          mkdir -p "$RUNNER_TEMP/calibcheck-library" "$RUNNER_TEMP/calibcheck-build"
+          export R_LIBS_USER="$RUNNER_TEMP/calibcheck-library"
+          echo "R_LIBS_USER=$R_LIBS_USER" >> "$GITHUB_ENV"
+          cd "$RUNNER_TEMP/calibcheck-build"
+          /usr/bin/R CMD build "$GITHUB_WORKSPACE"
+          /usr/bin/R CMD check --as-cran --no-manual calibcheck_0.1.0.tar.gz
+          grep -E 'Status: (OK|[0-9]+ NOTE(S)?)$' calibcheck.Rcheck/00check.log
+          /usr/bin/R CMD INSTALL -l "$R_LIBS_USER" calibcheck_0.1.0.tar.gz
+      - name: Independent oracles and application
+        run: /usr/bin/Rscript -e 'library(calibcheck); source("validation/bounded_parity.R"); source("validation/concentration_parity.R"); source("validation/state_example.R")'
+      - name: Coverage
+        run: /usr/bin/Rscript -e 'x <- covr::package_coverage("."); print(x); stopifnot(covr::percent_coverage(x)>=80)'
