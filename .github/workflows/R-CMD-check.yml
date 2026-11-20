@@ -79,7 +79,7 @@ jobs:
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra qpdf
+          sudo apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra qpdf tidy
       - name: Full CRAN check and source tarball
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
         shell: bash
@@ -88,7 +88,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/calibcheck-source" "$RUNNER_TEMP/calibcheck-release"
           git archive HEAD | tar -x -C "$RUNNER_TEMP/calibcheck-source"
-          Rscript -e 'x <- spelling::spell_check_package(Sys.getenv("RUNNER_TEMP") |> file.path("calibcheck-source")); print(x)'
+          Rscript -e 'x <- spelling::spell_check_package(Sys.getenv("RUNNER_TEMP") |> file.path("calibcheck-source")); print(x); stopifnot(nrow(x) == 0)'
           cd "$RUNNER_TEMP/calibcheck-release"
           R CMD build "$RUNNER_TEMP/calibcheck-source"
           R CMD check --as-cran calibcheck_0.1.0.tar.gz

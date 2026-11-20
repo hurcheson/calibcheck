@@ -12,7 +12,7 @@ On candidate f1f671e, [GitHub Actions](https://github.com/hurcheson/calibcheck/a
 - Windows Server 2022 / R 4.6.2.
 - macOS / R 4.6.2.
 
-All four current-R jobs reported 243 passing test expectations with no failures, warnings or skips. Both legacy jobs passed the 20 bounded-residual and 20 concentration oracle cases. These checks omitted the PDF manual; remote incoming checks were not actually run by the current-R helper action, so a new CI configuration explicitly enables incoming and remote checks and builds the PDF manual. Final results are pending.
+All four current-R jobs reported 243 passing test expectations with no failures, warnings or skips. Both legacy jobs passed the 20 bounded-residual and 20 concentration oracle cases. These checks omitted the PDF manual; remote incoming checks were not actually run by the current-R helper action, so a new CI configuration explicitly enables incoming and remote checks and builds the PDF manual. The subsequent full check (c1989c9) confirmed the expected New submission NOTE and PDF manual success, with one environment NOTE because HTML Tidy was missing. The final configuration installs Tidy and verifies spelling; fresh final results are pending.
 
 ## Remaining pre-submission evidence
 
