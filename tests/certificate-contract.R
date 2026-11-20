@@ -1,6 +1,6 @@
 if (Sys.getenv("CALIBCHECK_SOURCE") != "") {
   source(Sys.getenv("CALIBCHECK_SOURCE"))
-  source(Sys.getenv("CALIBCHECK_STAGE6"))
+  source(Sys.getenv("CALIBCHECK_FEASIBILITY_SOURCE"))
 } else library(calibcheck)
 
 M <- rbind(c(1,0),c(0,1),c(1,0),c(0,1))
@@ -23,4 +23,4 @@ g <- audit_calibration(diag(2),c(.5,.5),raw=c(1,1),margin=c("A","A"),level=c("x"
 stopifnot(identical(g$raw$ledger$margin,c("A","A")),identical(g$raw$ledger$level,c("x","y")))
 h <- audit_calibration(diag(2),c(.5,.5))
 stopifnot(is.null(h$raw),h$feasibility$status=="attainable_to_tolerance")
-cat("PASS Stage 6 contract\n")
+cat("PASS certificate contract\n")

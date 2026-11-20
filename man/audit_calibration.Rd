@@ -3,7 +3,8 @@
 \title{Audit normalized calibration weights}
 \usage{audit_calibration(M, target, raw = NULL, final = NULL, converged = NA,
   tolerance = 1e-6, case_id = NULL, margin = NULL, level = NULL,
-  lower = 0, upper = 1, target_num = NULL, target_den = NULL)}
+  lower = 0, upper = 1, target_num = NULL, target_den = NULL,
+  concentration = TRUE)}
 \arguments{
 \item{M}{Numeric or logical binary matrix with margin cells as rows and tasks as columns.}
 \item{target}{Target fractions, one per row; roundoff just above one within two machine epsilons is corrected with a warning.}
@@ -12,8 +13,9 @@
 \item{converged}{Optional logical upstream convergence flag; unknown is NA.}
 \item{tolerance}{Positive absolute proportion-scale tolerance.}
 \item{case_id}{Optional nonmissing case identifier for each task.}
-\item{margin,level}{Optional row labels; a complete one-hot margin with inconsistent target total generates a warning.}
+\item{margin,level}{Optional row labels; a complete one-hot margin with inconsistent target total generates a warning when margin labels are supplied. Unlabelled rows do not trigger this check.}
 \item{lower,upper}{Normalized per-task box bounds for the feasibility model; scalar or one per column.}
+\item{concentration}{Logical; compute the optional minimum maximum-weight diagnostic.}
 \item{target_num,target_den}{Optional explicit integer target numerators and common denominator matching target.}
 }
 \description{Audits supplied weights independently of their estimator.}

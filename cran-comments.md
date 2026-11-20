@@ -4,8 +4,9 @@ Initial submission candidate, version 0.1.0. Not submitted.
 
 ## Test environments
 
-- Ubuntu 22.04 / R 4.1.2 and Ubuntu 24.04 / R 4.3.3: package checks, value-based tests, vignette, independent synthetic oracles and coverage are configured in GitHub Actions. Record the public run results here before submission.
-- Current R release and R-devel checks, Windows and macOS checks, manual build, and CRAN incoming checks with remote access: pending.
+- Earlier public candidate (515cd6e): Ubuntu 22.04 / R 4.1.2 and Ubuntu 24.04 / R 4.3.3, Status OK with remote incoming and clock checks disabled and no manual. Coverage 91.82% and 92.27%.
+- Current release and R-devel on Linux, Windows and macOS: configured in CI; results pending on the revised candidate.
+- win-builder, mac-builder, final manual and CRAN incoming checks: record actual results before submission.
 
 ## Notes
 

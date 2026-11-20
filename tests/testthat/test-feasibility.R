@@ -56,7 +56,7 @@ test_that("six synthetic support-pattern cases obtain exact certificates at both
     expect_equal(a$upper,z$opt,tolerance=1e-7)
   }
 })
-test_that("40 frozen parity fixtures match exact reviewer optima", {
+test_that("40 frozen parity fixtures match reference optima", {
   for(z in parity) {
     a <- if(z$rational) check_feasibility(z$M,round(z$target*100)/100,target_num=round(z$target*100),target_den=100) else check_feasibility(z$M,z$target)
     expect_equal(a$lower,z$opt,tolerance=1e-7)

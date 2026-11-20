@@ -1,5 +1,6 @@
 bibentry(bibtype = "Manual",
   title = "calibcheck: Audit Normalized Calibration Weights",
-  author = person("Hurcheson", "Ofori"),
+  author = person("Hurcheson Asante", "Ofori"),
   year = "2026",
-  note = "R package version 0.1.0")
+  note = "R package version 0.1.0",
+  url = "https://hurcheson.github.io/calibcheck/")

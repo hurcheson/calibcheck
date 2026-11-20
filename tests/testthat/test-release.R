@@ -28,3 +28,36 @@ test_that("integer guard and adaptive retry remain explicit", {
   expect_gt(f$certificate$resolution,2^20)
   expect_null(rationalize_certificate(M,c(1,1),2^50,f))
 })
+
+test_that("logical matrices and labelled margin validation are supported", {
+  M <- diag(2)
+  expect_equal(check_feasibility(M > 0, c(.5,.5)), check_feasibility(M, c(.5,.5)))
+  expect_warning(calibration_matrix(data.frame(region="a"), list(region=c(a=.4,b=.4))), "inconsistent")
+  expect_error(audit_calibration(M,c(.5,.5),margin="A"), "margin labels")
+  expect_error(audit_calibration(M,c(.5,.5),margin=c("A",NA)), "margin labels")
+  expect_error(audit_calibration(M,c(.5,.5),level=c("x",NA)), "level labels")
+  expect_warning(audit_calibration(M,c(.5,.4)), NA)
+})
+test_that("skipping concentration preserves feasibility and audit results", {
+  M <- matrix(c(1,1,0,0),1)
+  a <- audit_calibration(M,.6,raw=c(.1,.5,.2,.2),upper=.7)
+  b <- audit_calibration(M,.6,raw=c(.1,.5,.2,.2),upper=.7,concentration=FALSE)
+  expect_true(is.na(b$feasibility$min_max_weight))
+  expect_null(b$feasibility$concentration_status)
+  a$feasibility$min_max_weight <- NA_real_
+  a$feasibility$concentration_status <- NULL
+  expect_equal(a,b)
+  expect_true(is.na(check_feasibility(M,.6,concentration=FALSE)$min_max_weight))
+  expect_error(check_feasibility(M,.6,concentration=NA), "concentration")
+})
+test_that("unrepresentable tolerance and unsafe rational witnesses stay conservative", {
+  expect_null(calibcheck:::tolerance_fraction(2^-30))
+  M <- diag(2)
+  f <- check_feasibility(M,c(.5,.5),tolerance=2^-30)
+  expect_true(f$exact)
+  f$weight_witness <- c(0,0)
+  expect_null(rationalize_certificate(M,c(1,1),2,f))
+  f$weight_witness <- c(.5,.5)
+  f$dual_witness <- c(2^50,2^50)
+  expect_null(rationalize_certificate(M,c(1,1),2,f))
+})

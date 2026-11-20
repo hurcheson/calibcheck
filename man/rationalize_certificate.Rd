@@ -16,6 +16,7 @@ unknown population proportion. Integer products are bounded by the existing
 2^50 guard. If the required denominator is too large, no certificate is
 returned; arbitrary precision is not implemented. Resolution starts at
 2^20, then 2^31, then the largest conservative safe integer if needed.
+If the tolerance cannot be represented by a round-tripping decimal within the integer cap (for example, 2^-30), a nonzero certificate bracket remains undecided; an exactly zero upper bound is decisive for any positive tolerance.
 Numerical ambiguity is not solver failure.}
 \value{An exact rational bracket with explicit integer witnesses and certificate status, or NULL if no safe witness can be constructed.}
 \examples{M <- diag(2); f <- check_feasibility(M,c(.5,.5)); rationalize_certificate(M,c(1,1),2,f)}
