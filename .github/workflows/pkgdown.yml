@@ -27,20 +27,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Build pkgdown
         run: /usr/bin/Rscript -e 'pkgdown::build_site()'
-      - name: Label the documentation search field
-        shell: Rscript {0}
-        run: |
-          pages <- list.files("docs", pattern = "[.]html$", recursive = TRUE, full.names = TRUE)
-          for (page in pages) {
-            html <- xml2::read_html(page)
-            fields <- xml2::xml_find_all(html, "//input[@id='search-input']")
-            if (length(fields)) {
-              xml2::xml_set_attr(fields, "aria-label", "Search documentation")
-              xml2::write_html(html, page)
-            }
-          }
-          home <- xml2::read_html("docs/index.html")
-          stopifnot(length(xml2::xml_find_all(home, "//input[@aria-label='Search documentation']")) == 1L)
+      - name: Prepare and verify site navigation
+        run: /usr/bin/Rscript .github/scripts/prepare-site.R
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: pkgdown-site
